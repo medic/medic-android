@@ -259,6 +259,9 @@ android {
     surveillance_covid19_kenya {
       applicationId = 'org.medicmobile.webapp.mobile.surveillance_covid19_kenya'
     }
+    zazic_scale_up_dev {
+      applicationId = 'org.medicmobile.webapp.mobile.zazic_scale_up_dev'
+    }
   }
 
   splits {

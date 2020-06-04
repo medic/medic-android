@@ -12,22 +12,5 @@ platform :android do
     package_name = options[:flavor] == 'unbranded' ? "org.medicmobile.webapp.mobile" : "org.medicmobile.webapp.mobile.#{options[:flavor]}"
 
     gradle(task: gradleTaskName)
-
-    supply(
-      package_name: package_name,
-      track: "alpha",
-      json_key: "playstore-secret.json",
-      apk_paths: [
-        "build/outputs/apk/#{options[:flavor]}/release/medic-android-#{version}-#{options[:flavor]}-arm64-v8a-release.apk",
-        "build/outputs/apk/#{options[:flavor]}/release/medic-android-#{version}-#{options[:flavor]}-armeabi-v7a-release.apk",
-      ],
-      skip_upload_aab: true,
-      skip_upload_metadata: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
-      validate_only: false,
-
-      timeout: 3600,
-    )
   end
 end
