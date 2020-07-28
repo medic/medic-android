@@ -39,7 +39,6 @@
     <activity android:name="LockScreen"
         android:screenOrientation="portrait"/>
     <activity android:name="EmbeddedBrowserActivity"
-        android:screenOrientation="portrait"
         android:configChanges="orientation|screenSize"/>
     <activity android:name="FreeSpaceWarningActivity"
         android:screenOrientation="portrait"/>
