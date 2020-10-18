@@ -259,6 +259,9 @@ android {
     surveillance_covid19_kenya {
       applicationId = 'org.medicmobile.webapp.mobile.surveillance_covid19_kenya'
     }
+    msf_goma {
+      applicationId = 'org.medicmobile.webapp.mobile.msf_goma'
+    }
   }
 
   splits {

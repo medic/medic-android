@@ -47,6 +47,7 @@ jobs:
     - script:
       - fastlane deploy flavor:moh_zanzibar_training
       - fastlane deploy flavor:moh_zanzibar
+      - fastlane deploy flavor:msf_goma
     - script:
       - fastlane deploy flavor:musomali
       - fastlane deploy flavor:pih_malawi
