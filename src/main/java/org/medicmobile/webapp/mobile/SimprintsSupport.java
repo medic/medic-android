@@ -14,7 +14,7 @@ import org.json.JSONException;
 
 import static com.simprints.libsimprints.Constants.SIMPRINTS_IDENTIFICATIONS;
 import static com.simprints.libsimprints.Constants.SIMPRINTS_REGISTRATION;
-import static org.medicmobile.webapp.mobile.BuildConfig.SIMPRINTS_API_KEY;
+import static org.medicmobile.webapp.mobile.BuildConfig.SIMPRINTS_PROJECT_ID;
 import static org.medicmobile.webapp.mobile.BuildConfig.SIMPRINTS_MODULE_ID;
 import static org.medicmobile.webapp.mobile.BuildConfig.SIMPRINTS_USER_ID;
 import static org.medicmobile.webapp.mobile.JavascriptUtils.safeFormat;
@@ -118,7 +118,7 @@ final class SimprintsSupport {
 
 //> STATIC HELPERS
 	private static SimHelper simHelper() {
-		return new SimHelper(SIMPRINTS_API_KEY, SIMPRINTS_USER_ID);
+		return new SimHelper(SIMPRINTS_PROJECT_ID, SIMPRINTS_USER_ID);
 	}
 
 	private static void checkValid(int targetInputId) {

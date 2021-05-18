@@ -32,7 +32,7 @@ repositories {
   }
 }
 
-def simprintsApiKey, simprintsModuleId, simprintsUserId
+def simprintsProjectId, simprintsModuleId, simprintsUserId
 
 def getVersionCode = {
   int versionCode = 2
@@ -88,12 +88,12 @@ android {
     buildConfigField "boolean", "DISABLE_APP_URL_VALIDATION", "Boolean.parseBoolean(\"${System.env.DISABLE_APP_URL_VALIDATION}\")";
     buildConfigField "String", "LOG_TAG", '"MedicMobile"'
 
-    if(System.env.SIMPRINTS_API_KEY) {
-      buildConfigField "String", "SIMPRINTS_API_KEY", /"${System.env.SIMPRINTS_API_KEY}"/
-    } else if(simprintsApiKey) {
-      buildConfigField "String", "SIMPRINTS_API_KEY", /"${simprintsApiKey}"/
+    if(System.env.SIMPRINTS_PROJECT_ID) {
+      buildConfigField "String", "SIMPRINTS_PROJECT_ID", /"${System.env.SIMPRINTS_PROJECT_ID}"/
+    } else if(simprintsProjectId) {
+      buildConfigField "String", "SIMPRINTS_PROJECT_ID", /"${simprintsProjectId}"/
     } else {
-      buildConfigField "String", "SIMPRINTS_API_KEY", /"Medic's API Key"/
+      buildConfigField "String", "SIMPRINTS_PROJECT_ID", /"Medic's Project ID"/
     }
 
     if(System.env.SIMPRINTS_USER_ID) {
@@ -190,7 +190,7 @@ android {
       // for `unbranded` - it will use the defaults in
       // src/main
       dimension = 'brand'
-      simprintsApiKey = 'f4c47c4e-d6ee-444f-b16e-22a4761b1f3c'
+      simprintsProjectId = 'A8r6NmtRtTBtTuPepd88'
       simprintsModuleId = 'simprints.app'
       simprintsUserId = 'test@simprints.app'
     }
@@ -293,7 +293,7 @@ android {
       dimension = 'brand'
       applicationId = 'org.medicmobile.webapp.mobile.simprints'
 
-      simprintsApiKey = 'f4c47c4e-d6ee-444f-b16e-22a4761b1f3c'
+      simprintsProjectId = 'A8r6NmtRtTBtTuPepd88'
       simprintsModuleId = 'simprints.app'
       simprintsUserId = 'test@simprints.app'
     }
@@ -345,7 +345,7 @@ android {
 
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
-  implementation 'com.simprints:LibSimprints:1.0.11'
+  implementation 'com.simprints:libsimprints:2020.3.0'
   implementation 'com.github.Mariovc:ImagePicker:1.2.2'
   xwalkImplementation files('src/xwalk/libs/xwalk_core_library-23.53.589.4-arm64-v8a.aar')
   testImplementation 'junit:junit:4.12'
