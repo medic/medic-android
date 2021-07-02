@@ -1,18 +1,30 @@
 package org.medicmobile.webapp.mobile;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static org.medicmobile.webapp.mobile.BuildConfig.DEBUG;
+import static org.medicmobile.webapp.mobile.BuildConfig.DISABLE_APP_URL_VALIDATION;
+import static org.medicmobile.webapp.mobile.MedicLog.error;
+import static org.medicmobile.webapp.mobile.MedicLog.log;
+import static org.medicmobile.webapp.mobile.MedicLog.trace;
+import static org.medicmobile.webapp.mobile.MedicLog.warn;
+import static org.medicmobile.webapp.mobile.SimpleJsonClient2.redactUrl;
+import static org.medicmobile.webapp.mobile.Utils.connectionErrorToString;
+import static org.medicmobile.webapp.mobile.Utils.createUseragentFrom;
+import static org.medicmobile.webapp.mobile.Utils.isConnectionError;
+import static org.medicmobile.webapp.mobile.Utils.isUrlRelated;
+import static org.medicmobile.webapp.mobile.Utils.restartApp;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.app.ActivityManager;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,22 +41,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import java.util.Arrays;
-
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
-import static org.medicmobile.webapp.mobile.BuildConfig.DEBUG;
-import static org.medicmobile.webapp.mobile.BuildConfig.DISABLE_APP_URL_VALIDATION;
-import static org.medicmobile.webapp.mobile.MedicLog.error;
-import static org.medicmobile.webapp.mobile.MedicLog.log;
-import static org.medicmobile.webapp.mobile.MedicLog.trace;
-import static org.medicmobile.webapp.mobile.MedicLog.warn;
-import static org.medicmobile.webapp.mobile.SimpleJsonClient2.redactUrl;
-import static org.medicmobile.webapp.mobile.Utils.connectionErrorToString;
-import static org.medicmobile.webapp.mobile.Utils.createUseragentFrom;
-import static org.medicmobile.webapp.mobile.Utils.isConnectionError;
-import static org.medicmobile.webapp.mobile.Utils.isUrlRelated;
-import static org.medicmobile.webapp.mobile.Utils.restartApp;
 
 @SuppressWarnings({ "PMD.GodClass", "PMD.TooManyMethods" })
 public class EmbeddedBrowserActivity extends LockableActivity {
@@ -60,6 +60,9 @@ public class EmbeddedBrowserActivity extends LockableActivity {
 	static final int GRAB_PHOTO_ACTIVITY_REQUEST_CODE = (0 << 3) | NON_SIMPRINTS_FLAGS;
 	static final int GRAB_MRDT_PHOTO_ACTIVITY_REQUEST_CODE = (1 << 3) | NON_SIMPRINTS_FLAGS;
 	static final int DISCLOSURE_LOCATION_ACTIVITY_REQUEST_CODE = (2 << 3) | NON_SIMPRINTS_FLAGS;
+	static final int RDTOOLKIT_PROVISION_ACTIVITY_REQUEST_CODE = (3 << 3) | NON_SIMPRINTS_FLAGS;
+	static final int RDTOOLKIT_CAPTURE_ACTIVITY_REQUEST_CODE = (4 << 3) | NON_SIMPRINTS_FLAGS;
+	static final int ACCESS_STORAGE_PERMISSION_REQUEST_CODE = (5 << 3) | NON_SIMPRINTS_FLAGS;
 
 	// Arbitrarily selected value
 	private static final int ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE = 7038678;
@@ -85,6 +88,8 @@ public class EmbeddedBrowserActivity extends LockableActivity {
 	private MrdtSupport mrdt;
 	private PhotoGrabber photoGrabber;
 	private SmsSender smsSender;
+	private RDToolkitSupportActivity rdToolkitSupportActivity;
+
 
 	private boolean isMigrationRunning = false;
 
@@ -97,6 +102,7 @@ public class EmbeddedBrowserActivity extends LockableActivity {
 		this.simprints = new SimprintsSupport(this);
 		this.photoGrabber = new PhotoGrabber(this);
 		this.mrdt = new MrdtSupport(this);
+		this.rdToolkitSupportActivity = new RDToolkitSupportActivity(this);
 		try {
 			this.smsSender = new SmsSender(this);
 		} catch(Exception ex) {
@@ -231,6 +237,15 @@ public class EmbeddedBrowserActivity extends LockableActivity {
 							}
 						}
 						return;
+
+					case RDTOOLKIT_PROVISION_ACTIVITY_REQUEST_CODE:
+						processRdToolkitProvisionTestActivity(requestCode, resultCode, i);
+						return;
+
+					case RDTOOLKIT_CAPTURE_ACTIVITY_REQUEST_CODE:
+						processRdToolkitCaptureResultActivity(requestCode, resultCode, i);
+						return;
+
 					default:
 						trace(this, "onActivityResult() :: no handling for requestCode=%s",
 								requestCodeToString(requestCode));
@@ -247,16 +262,6 @@ public class EmbeddedBrowserActivity extends LockableActivity {
 		}
 	}
 
-	private String requestCodeToString(int requestCode) {
-		if (requestCode == ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE) {
-			return "ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE";
-		}
-		if (requestCode == DISCLOSURE_LOCATION_ACTIVITY_REQUEST_CODE) {
-			return "DISCLOSURE_LOCATION_ACTIVITY_REQUEST_CODE";
-		}
-		return String.valueOf(requestCode);
-	}
-
 //> ACCESSORS
 	SimprintsSupport getSimprintsSupport() {
 		return this.simprints;
@@ -268,6 +273,10 @@ public class EmbeddedBrowserActivity extends LockableActivity {
 
 	SmsSender getSmsSender() {
 		return this.smsSender;
+	}
+
+	RDToolkitSupportActivity getRdToolkitSupportActivity() {
+		return this.rdToolkitSupportActivity;
 	}
 
 //> PUBLIC API
@@ -300,6 +309,28 @@ public class EmbeddedBrowserActivity extends LockableActivity {
 	}
 
 //> PRIVATE HELPERS
+	private String requestCodeToString(int requestCode) {
+		if (requestCode == ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE) {
+			return "ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE";
+		}
+		if (requestCode == DISCLOSURE_LOCATION_ACTIVITY_REQUEST_CODE) {
+			return "DISCLOSURE_LOCATION_ACTIVITY_REQUEST_CODE";
+		}
+		return String.valueOf(requestCode);
+	}
+
+	private void processRdToolkitProvisionTestActivity(int requestCode, int resultCode, Intent intentData) {
+		String provisionScript = rdToolkitSupportActivity.processActivity(requestCode, resultCode, intentData);
+		trace(this, "RDToolkitSupport :: Executing JavaScript: %s", provisionScript);
+		evaluateJavascript(provisionScript);
+	}
+
+	private void processRdToolkitCaptureResultActivity(int requestCode, int resultCode, Intent intentData) {
+		String captureScript = rdToolkitSupportActivity.processActivity(requestCode, resultCode, intentData);
+		trace(this, "RDToolkitSupport :: Executing JavaScript: %s", captureScript);
+		evaluateJavascript(captureScript);
+	}
+
 	private void configureUseragent() {
 		String current = WebSettings.getDefaultUserAgent(this);
 		container.getSettings().setUserAgentString(createUseragentFrom(current));
@@ -389,10 +420,22 @@ public class EmbeddedBrowserActivity extends LockableActivity {
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-		if (requestCode != ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE) {
+		boolean granted = grantResults.length > 0 && grantResults[0] == PERMISSION_GRANTED;
+
+		if (requestCode == ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE) {
+			locationRequestResolved();
 			return;
 		}
-		locationRequestResolved();
+
+		if (requestCode == ACCESS_STORAGE_PERMISSION_REQUEST_CODE) {
+			if (granted) {
+				this.rdToolkitSupportActivity.resumeCaptureActivity();
+				return;
+			}
+
+			trace(this, "RDToolkitSupport :: User rejected permission.");
+			return;
+		}
 	}
 
 	public void locationRequestResolved() {

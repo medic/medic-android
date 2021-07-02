@@ -94,14 +94,25 @@ This release changes the way in which location data is collected to better align
 # Development
 
 1. Install Android SDK
-2. Clone the repo
+2. Clone the repository
 3. Plug in your phone. Check it's detected with `adb devices`
-4. Execute: `make` (will also push app unto phone)
+4. Execute `make` to build and install the app in the phone. For Xwalk development, execute `make xwalk`.
+
+See the [makefile](./Makefile) for more command line options.
+
+## Debug Xwalk with Android Studio
+
+1. Select a Xwalk flavor in `Build` > `Select Build Variant`.
+2. Disable Android Jetifier: The Xwalk flavor uses the old Android Support Library (android.support.*).
+    * Navigate to `Settings` or `Preferences` > `Build, Execution, Deployment` > `Compiler`.
+    * Add `-Pandroid.enableJetifier=false` in the `Command-line Options` field (remember to remove this when debugging with Webview).
+    * Click `OK` save changes.
+3. Click the debug button in the toolbar.
 
 # Testing - Instrumentation Tests (UI Tests)
 
 1. Install Android SDK
-2. Clone the repo
+2. Clone the repository
 3. Plug in your phone. Check it's detected with `adb devices`
 4. Execute: `./gradlew connected[Flavor]WebviewDebugAndroidTest` . Eg `./gradlew connectedUnbrandedWebviewDebugAndroidTest` or `./gradlew connectedMedicmobilegammaWebviewDebugAndroidTest`. At the moment we have tests only in these 2 flavors: unbranded and medicmobilegamma. To avoid failures running the tests, previous versions of the app should be uninstalled first, otherwise an `InstallException: INSTALL_FAILED_VERSION_DOWNGRADE` can make the tests to fail, and Android needs to have English as default language.
 

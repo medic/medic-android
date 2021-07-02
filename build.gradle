@@ -12,6 +12,7 @@ buildscript {
     classpath 'com.noveogroup.android:check:1.2.5'
   }
 }
+
 apply plugin: 'com.android.application'
 apply plugin: 'com.noveogroup.android.check'
 
@@ -61,7 +62,9 @@ def getVersionName = {
 
 android {
   compileSdkVersion 29
+
   buildToolsVersion '29.0.2'
+
   packagingOptions {
     exclude 'META-INF/LICENSE'
     exclude 'META-INF/NOTICE'
@@ -72,41 +75,42 @@ android {
     archivesBaseName = "${project.name}-${versionName}"
     targetSdkVersion 29
     // When upgrading targetSdkVersion, check that the app menu still works on newer devices.
-      //for espresso tests
-      testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-      //test user credentials
-      buildConfigField "String", "TEST_USERNAME", "\"${System.env.ANDROID_TEST_USERNAME}\""
-      buildConfigField "String", "TEST_PASSWORD", "\"${System.env.ANDROID_TEST_PASSWORD}\""
-      if(System.env.ANDROID_TEST_URL){
-        buildConfigField "String", "SERVER_URL", "\"${System.env.ANDROID_TEST_URL}\""
-      }else {
-        buildConfigField "String", "SERVER_URL", '"https://gamma-cht.dev.medicmobile.org"'
-      }
+    // For espresso tests
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    // Test user credentials
+    buildConfigField "String", "TEST_USERNAME", "\"${System.env.ANDROID_TEST_USERNAME}\""
+    buildConfigField "String", "TEST_PASSWORD", "\"${System.env.ANDROID_TEST_PASSWORD}\""
+
+    if (System.env.ANDROID_TEST_URL) {
+      buildConfigField "String", "SERVER_URL", "\"${System.env.ANDROID_TEST_URL}\""
+    } else {
+      buildConfigField "String", "SERVER_URL", '"https://gamma-cht.dev.medicmobile.org"'
+    }
   }
 
   applicationVariants.all { variant ->
     buildConfigField "boolean", "DISABLE_APP_URL_VALIDATION", "Boolean.parseBoolean(\"${System.env.DISABLE_APP_URL_VALIDATION}\")";
     buildConfigField "String", "LOG_TAG", '"MedicMobile"'
 
-    if(System.env.SIMPRINTS_API_KEY) {
+    if (System.env.SIMPRINTS_API_KEY) {
       buildConfigField "String", "SIMPRINTS_API_KEY", /"${System.env.SIMPRINTS_API_KEY}"/
-    } else if(simprintsApiKey) {
+    } else if (simprintsApiKey) {
       buildConfigField "String", "SIMPRINTS_API_KEY", /"${simprintsApiKey}"/
     } else {
       buildConfigField "String", "SIMPRINTS_API_KEY", /"Medic's API Key"/
     }
 
-    if(System.env.SIMPRINTS_USER_ID) {
+    if (System.env.SIMPRINTS_USER_ID) {
       buildConfigField "String", "SIMPRINTS_USER_ID", /"${System.env.SIMPRINTS_USER_ID}"/
-    } else if(simprintsUserId) {
+    } else if (simprintsUserId) {
       buildConfigField "String", "SIMPRINTS_USER_ID", /"${simprintsUserId}"/
     } else {
       buildConfigField "String", "SIMPRINTS_USER_ID", '"some-user-id"'
     }
 
-    if(System.env.SIMPRINTS_MODULE_ID) {
+    if (System.env.SIMPRINTS_MODULE_ID) {
       buildConfigField "String", "SIMPRINTS_MODULE_ID", /"${System.env.SIMPRINTS_MODULE_ID}"/
-    } else if(simprintsModuleId) {
+    } else if (simprintsModuleId) {
       buildConfigField "String", "SIMPRINTS_MODULE_ID", /"${simprintsModuleId}"/
     } else {
       buildConfigField "String", "SIMPRINTS_MODULE_ID", '"Medic Module ID"'
@@ -158,7 +162,7 @@ android {
 
     xmlReport false
 
-    if(System.env.CI == 'true') {
+    if (System.env.CI == 'true') {
       abortOnError true
       htmlReport false
       textReport true
@@ -167,6 +171,7 @@ android {
   }
 
   flavorDimensions 'brand', 'version'
+
   productFlavors {
 
     webview {
@@ -356,12 +361,27 @@ android {
   }
 }
 
+gradle.taskGraph.whenReady { graph ->
+  if (project.hasProperty("xwalk")) {
+    if (xwalk == "true") {
+      graph.allTasks.findAll { it.name.contains("Webview") }*.enabled = false
+    } else {
+      graph.allTasks.findAll { it.name.contains("Xwalk") }*.enabled = false
+    }
+  }
+}
+
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
   implementation 'com.simprints:LibSimprints:1.0.11'
   implementation 'com.github.Mariovc:ImagePicker:1.2.2'
+  webviewImplementation 'com.github.dimagi:rd-toolkit:0.9.0'
   xwalkImplementation files('src/xwalk/libs/xwalk_core_library-23.53.589.4-arm64-v8a.aar')
   testImplementation 'junit:junit:4.12'
+  testImplementation 'org.mockito:mockito-core:3.9.0'
+  testImplementation 'org.powermock:powermock-core:2.0.9'
+  testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
+  testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
   testImplementation 'com.google.android:android-test:4.1.1.4'
   testImplementation 'org.robolectric:robolectric:4.3'
   androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'

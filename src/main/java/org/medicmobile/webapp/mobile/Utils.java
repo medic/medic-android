@@ -10,7 +10,16 @@ import android.webkit.WebResourceError;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static android.webkit.WebViewClient.*;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import static android.webkit.WebViewClient.ERROR_CONNECT;
+import static android.webkit.WebViewClient.ERROR_HOST_LOOKUP;
+import static android.webkit.WebViewClient.ERROR_PROXY_AUTHENTICATION;
+import static android.webkit.WebViewClient.ERROR_TIMEOUT;
 import static org.medicmobile.webapp.mobile.BuildConfig.APPLICATION_ID;
 import static org.medicmobile.webapp.mobile.BuildConfig.DEBUG;
 import static org.medicmobile.webapp.mobile.BuildConfig.VERSION_NAME;
@@ -93,5 +102,33 @@ final class Utils {
 
 	static String connectionErrorToString(WebResourceError error) {
 		return String.format("%s [%s]", error.getDescription(), error.getErrorCode());
+	}
+
+	static String getUtcIsoDate(Date date) {
+		if (date == null) {
+			return null;
+		}
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.getDefault());
+		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+		return dateFormat.format(date);
+	}
+
+	/**
+	 * The file path can be a regular file or a content ("content://" scheme)
+	 * @param path {String} File path
+	 * @return
+	 */
+	static Uri getUriFromFilePath(String path) {
+		if (path == null) {
+			return null;
+		}
+
+		if ("content".equals(Uri.parse(path).getScheme())) {
+			return Uri.parse(path);
+		}
+
+		return Uri.fromFile(new File(path));
 	}
 }

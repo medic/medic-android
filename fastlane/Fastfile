@@ -7,7 +7,10 @@ default_platform(:android)
 platform :android do
   lane :build do |options|
     gradle(task: "assemble#{options[:flavor]}WebviewRelease")
-    gradle(task: "assemble#{options[:flavor]}XwalkRelease")
+    gradle(
+      task: "assemble#{options[:flavor]}XwalkRelease",
+      properties: { "android.enableJetifier" => false }
+    )
   end
 
   lane :deploy do |options|

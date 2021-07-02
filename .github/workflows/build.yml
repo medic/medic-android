@@ -8,8 +8,12 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
-    - name: Test
-      run: make test
+    - name: Run static check and lint
+      run: make static-check lint-webview
+    - name: Test Webview
+      run: make test-webview
+    - name: Test Xwalk
+      run: make test-xwalk
     - name: Set up ruby
       uses: ruby/setup-ruby@v1
       with:
