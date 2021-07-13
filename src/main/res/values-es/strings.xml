@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+	<string name="btnSave">Guardar</string>
+	<string name="btnCancel">Cancelar</string>
+	<string name="btnContinue">Continuar</string>
 	<string name="btnMoreInfo">Más info</string>
 	<string name="btnRetry">Reintentar</string>
+	<string name="btnQuit">Salir</string>
 
 	<string name="locRequestTitle">Acceso a la ubicación</string>
 	<string name="locRequestMessage">%s recolecta información de la ubicación para analizar y mejorar resultados de salud en tu área. Para permitir el acceso a la ubicación selecciona \"Activar\", y luego confirma en el próximo diálogo.</string>

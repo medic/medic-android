@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+	<string name="btnSave">Enregistrer</string>
+	<string name="btnCancel">Annuler</string>
+	<string name="btnContinue">Continuer</string>
 	<string name="btnMoreInfo">Plus d\'information</string>
 	<string name="btnRetry">Réessayer</string>
+	<string name="btnQuit">Quitter</string>
 
 	<string name="locRequestTitle">Accès à la position</string>
 	<string name="locRequestMessage">%s collecte votre position pour analyser et améliorer les services de santé dans votre région. Pour permettre l\'accès aux données de position, sélectionnez \"Activer\" et confirmez à l\'écran qui suivra.</string>
