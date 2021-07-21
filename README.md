@@ -3,10 +3,22 @@ CHT Android App
 
 The cht-android application is a thin wrapper to load the [CHT Core Framework](https://github.com/medic/cht-core/) web application in a webview. This allows the application to be hardcoded to a specific CHT deployment and have a partner specific logo and display name. This app also provides some deeper integration with other android apps and native phone functions that are otherwise unavailable to webapps.
 
+# Android App Bundles
+
+The build script produces multiple AABs for publishing to the **Google Play Store**, so the generated `.aab` files need to be uploaded instead of the `.apk` files if the Play Store require so. For each flavor two bundles are generated, one for each rendering engine: _Webview_ and _Xwalk_.
+
+The AABs are named as follows: `cht-android-{version}-{brand}-{rendering-engine}-release.aab`
+
+| Rendering engine | Android version |
+|------------------|-----------------|
+| `webview`        | 10+             |
+| `xwalk`          | 4.4 - 9         |
 
 # APKs
 
-For compatibility with a wide range of devices the build script produces multiple APKs. The two variables are the instruction set used by the device's CPU, and the supported Android version. When publishing to the Google Play Store upload all APKs and it will automatically choose the right one for the target device. However, when sideloading the application it is essential to pick the correct APK or the application may crash.
+For compatibility with a wide range of devices the build script produces multiple APKs. The two variables are the instruction set used by the device's CPU, and the supported Android version. When sideloading the application it is essential to pick the correct APK or the application may crash.
+
+If the Play Store allows to publish new releases of the app in APK format instead of AAB, upload all APKs and it will automatically choose the right one for the target device.
 
 To help you pick which APK to install you can find information about the version of Android and the CPU in the About section of the phone's settings menu.
 
@@ -122,6 +134,8 @@ Each APK will be generated and stored in `build/outputs/apk/[flavor][Engine]/[de
 
 To assemble other flavors, use the following command: `make flavour=[Flavor][Engine] assemble`. See the [Flavor selection](#flavor-selection) section for more details about `make` commands.
 
+To create the `.aab` bundle file, use `make bundle`, although signed versions are generated when [releasing](#releasing), and the Play Store requires the AAB to be signed with the right key.
+
 To clean the APKs and compiled resources: `make clean`.
 
 ## Static checks
@@ -173,7 +187,7 @@ To add a new brand:
 
 1. Make sure all issues for this release have passed AT and been merged into `master`.
 2. Create a git tag starting with `v` and ending with the alpha version, e.g. `v1.2.3-alpha.1` and push the tag to GitHub.
-3. Creating this tag will trigger [GitHub Action](https://github.com/medic/cht-android/actions) to build, sign, and properly version the build. The release-ready APKs are available for side-loading from [GitHub Releases](https://github.com/medic/cht-android/releases).
+3. Creating this tag will trigger [GitHub Action](https://github.com/medic/cht-android/actions) to build, sign, and properly version the build. The release-ready APKs are available for side-loading from [GitHub Releases](https://github.com/medic/cht-android/releases), along with the AABs that are required to publish in the Google Play Store.
 4. Announce the release in #quality-assurance.
 
 ## Final for users

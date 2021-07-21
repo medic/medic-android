@@ -38,6 +38,11 @@ assemble-all:
 assemble-all-debug:
 	${GRADLE} ${GRADLE_OPTS} assembleDebug
 
+bundle:
+	${GRADLE} ${GRADLE_OPTS} bundle${flavor}Release
+bundle-all:
+	${GRADLE} ${GRADLE_OPTS} bundleRelease
+
 uninstall-all:
 	${GRADLE} uninstallAll
 

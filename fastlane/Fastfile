@@ -10,6 +10,11 @@ platform :android do
     gradle(task: "assemble#{options[:flavor]}XwalkRelease")
   end
 
+  lane :bundle do |options|
+    gradle(task: "bundle#{options[:flavor]}WebviewRelease")
+    gradle(task: "bundle#{options[:flavor]}XwalkRelease")
+  end
+
   lane :deploy do |options|
     version = ENV['RELEASE_VERSION'].empty? ? 'SNAPSHOT' : ENV['RELEASE_VERSION']
     package_name = options[:flavor] == 'unbranded' ? "org.medicmobile.webapp.mobile" : "org.medicmobile.webapp.mobile.#{options[:flavor]}"
@@ -30,7 +35,27 @@ platform :android do
       skip_upload_images: true,
       skip_upload_screenshots: true,
       validate_only: false,
+      timeout: 3600,
+    )
+  end
 
+  lane :deploy_bundle do |options|
+    version = ENV['RELEASE_VERSION'].empty? ? 'SNAPSHOT' : ENV['RELEASE_VERSION']
+    package_name = options[:flavor] == 'unbranded' ? "org.medicmobile.webapp.mobile" : "org.medicmobile.webapp.mobile.#{options[:flavor]}"
+
+    supply(
+      package_name: package_name,
+      track: "alpha",
+      json_key: "playstore-secret.json",
+      aab_paths: [
+        "build/outputs/bundle/#{options[:flavor]}WebviewRelease/cht-android-#{version}-#{options[:flavor]}-webview-release.aab",
+        "build/outputs/bundle/#{options[:flavor]}XwalkRelease/cht-android-#{version}-#{options[:flavor]}-xwalk-release.aab",
+      ],
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      validate_only: false,
       timeout: 3600,
     )
   end
