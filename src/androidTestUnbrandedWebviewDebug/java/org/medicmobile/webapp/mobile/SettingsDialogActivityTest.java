@@ -1,6 +1,5 @@
 package org.medicmobile.webapp.mobile;
 
-
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -8,8 +7,10 @@ import androidx.test.espresso.DataInteraction;
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.web.webdriver.DriverAtoms;
 import androidx.test.espresso.web.webdriver.Locator;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
-import androidx.test.rule.ActivityTestRule;
+import java.util.Locale;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -18,9 +19,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-
-import java.util.Locale;
-
 import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.pressBack;
@@ -45,11 +43,10 @@ import static androidx.test.espresso.web.webdriver.DriverAtoms.webClick;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.containsString;
-import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 
 @LargeTest
-@RunWith(AndroidJUnit4ClassRunner.class)
+@RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class SettingsDialogActivityTest {
 
@@ -60,7 +57,8 @@ public class SettingsDialogActivityTest {
 	private static final String ERROR_INCORRECT = "Incorrect user name or password. Please try again.";
 
 	@Rule
-	public ActivityTestRule<SettingsDialogActivity> mActivityTestRule = new ActivityTestRule<>(SettingsDialogActivity.class);
+	public ActivityScenarioRule<SettingsDialogActivity> mActivityTestRule =
+			new ActivityScenarioRule<>(SettingsDialogActivity.class);
 
 	@Test
 	public void serverSelectionScreenIsDisplayed() {
@@ -101,21 +99,28 @@ public class SettingsDialogActivityTest {
 						isDisplayed()));
 		webView.check(matches(isDisplayed()));
 		onWebView()
+				.withNoTimeout()
 				.check(webContent(hasElementWithId("form")))
 				.withElement(findElement(Locator.ID, "locale"))
 				.check(webMatches(getText(), containsString("English")));
 		String[] codes = {"es", "en", "fr", "sw"};
 		for (String code : codes) {
-			onWebView().withElement(findElement(Locator.NAME, code))
+			onWebView()
+					.withNoTimeout()
+					.withElement(findElement(Locator.NAME, code))
 					.check(webMatches(getText(), containsString(getLanguage(code))));
 		}
 
 		// Ensure language set is English
-		onWebView().withElement(findElement(Locator.NAME, "en"))
-					.perform(webClick());
+		onWebView()
+				.withNoTimeout()
+				.withElement(findElement(Locator.NAME, "en"))
+				.perform(webClick());
 
 		//login form and errors
-		onWebView().withElement(findElement(Locator.ID, "user"))
+		onWebView()
+				.withNoTimeout()
+				.withElement(findElement(Locator.ID, "user"))
 				.perform(clearElement())
 				.perform(DriverAtoms.webKeys("fakename"))    //to be created first
 				.withElement(findElement(Locator.ID, "password"))
@@ -124,7 +129,9 @@ public class SettingsDialogActivityTest {
 				.withElement(findElement(Locator.ID, "login"))
 				.perform(webClick());
 		Thread.sleep(4000);//TODO: use better ways to handle delays - takes longer with emulators
-		onWebView().withElement(findElement(Locator.CSS_SELECTOR, "p.error.incorrect"))
+		onWebView()
+				.withNoTimeout()
+				.withElement(findElement(Locator.CSS_SELECTOR, "p.error.incorrect"))
 				.check(webMatches(getText(), containsString(ERROR_INCORRECT)));
 	}
 
